@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>xsukax Google Search Builder</title>
+<style>
+/* xsukax Google Search Builder | GPL-3.0 License | github.com/xsukax */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-size:14px;color:#24292e;background:#f6f8fa;min-height:100vh}
+a{color:#0366d6;text-decoration:none}
+.hdr{background:#24292e;color:#fff;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+.hdr-logo{font-size:16px;font-weight:700;letter-spacing:-.2px}
+.hdr-logo span{color:#79c0ff}
+.hdr-sub{font-size:11px;color:#8b949e;margin-left:auto}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;padding:14px;max-width:1440px;margin:0 auto}
+@media(max-width:960px){.main{grid-template-columns:1fr}}
+.lcol{display:flex;flex-direction:column;gap:10px;min-width:0}
+.rcol{display:flex;flex-direction:column;gap:10px}
+@media(min-width:960px){.rcol{position:sticky;top:52px;max-height:calc(100vh - 66px);overflow-y:auto}}
+.card{background:#fff;border:1px solid #e1e4e8;border-radius:6px;overflow:hidden}
+.card-hdr{padding:8px 14px;background:#f6f8fa;border-bottom:1px solid #e1e4e8;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.card-hdr .arr{margin-left:auto;font-size:10px;color:#586069;transition:transform .18s;display:inline-block}
+.card-hdr.open .arr{transform:rotate(90deg)}
+.card-body{padding:12px 14px}
+.card-body.hide{display:none}
+.lbl{font-size:11px;font-weight:600;color:#586069;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:#e1e4e8;font-size:9px;color:#586069;cursor:help;font-style:normal;font-weight:700;flex-shrink:0}
+.tip:hover .tipbox{display:block}
+.tipbox{display:none;position:absolute;left:18px;top:-6px;background:#1b1f24;color:#cdd9e5;font-size:11px;padding:6px 9px;border-radius:5px;z-index:300;width:210px;line-height:1.5;font-weight:400;text-transform:none;letter-spacing:0;pointer-events:none;box-shadow:0 3px 10px rgba(0,0,0,.3)}
+.row{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+input[type=text],input[type=number],input[type=date],select{border:1px solid #e1e4e8;border-radius:6px;padding:5px 8px;font-size:13px;color:#24292e;background:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
+input[type=text]:focus,input[type=number]:focus,input[type=date]:focus,select:focus{border-color:#0366d6;box-shadow:0 0 0 3px rgba(3,102,214,.12)}
+input[type=text]{flex:1;min-width:0}
+input[type=number]{width:64px;flex-shrink:0}
+input[type=date]{flex:1;height:29px}
+select{flex:1;min-width:0;height:29px;cursor:pointer}
+.op-wrap{display:flex;gap:2px;flex-shrink:0}
+.op{padding:3px 7px;border-radius:4px;border:1px solid #e1e4e8;background:#f6f8fa;font-size:10px;font-weight:600;cursor:pointer;color:#586069;transition:all .12s}
+.op:hover{background:#e1e4e8}
+.op.and{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8}
+.op.or{background:#dcfce7;border-color:#86efac;color:#15803d}
+.op.not{background:#fee2e2;border-color:#fca5a5;color:#dc2626}
+.ex{padding:3px 7px;border-radius:4px;border:1px solid #e1e4e8;background:#f6f8fa;font-size:10px;font-weight:600;cursor:pointer;color:#586069;flex-shrink:0;transition:all .12s;font-family:"SFMono-Regular",Consolas,monospace}
+.ex:hover{background:#e1e4e8}
+.ex.on{background:#fee2e2;border-color:#fca5a5;color:#dc2626}
+.rm{background:none;border:none;color:#cb2431;font-size:18px;cursor:pointer;padding:0 2px;opacity:.45;flex-shrink:0;line-height:1;transition:opacity .12s}
+.rm:hover{opacity:1}
+.add-row{display:flex;align-items:center;justify-content:center;padding:5px 10px;border:1px dashed #0366d6;border-radius:6px;color:#0366d6;font-size:12px;cursor:pointer;background:transparent;width:100%;margin-top:5px;transition:background .12s}
+.add-row:hover{background:#f1f8ff}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.chip{padding:3px 10px;border-radius:20px;border:1px solid #e1e4e8;font-size:11px;cursor:pointer;background:#f6f8fa;transition:all .12s;color:#24292e;white-space:nowrap}
+.chip:hover,.chip.sel{background:#0366d6;border-color:#0366d6;color:#fff}
+.dtabs{display:flex;border-bottom:1px solid #e1e4e8;margin-bottom:10px}
+.dtab{padding:5px 11px;font-size:12px;cursor:pointer;border-bottom:2px solid transparent;color:#586069;transition:all .12s}
+.dtab.active{border-bottom-color:#0366d6;color:#0366d6;font-weight:600}
+.dtab-body{display:none}
+.dtab-body.show{display:block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:600px){.g2,.g3{grid-template-columns:1fr}}
+.sub-lbl{font-size:11px;color:#586069;margin-bottom:3px}
+.url-box{background:#f6f8fa;border:1px solid #e1e4e8;border-radius:6px;padding:10px 12px;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:11.5px;word-break:break-all;line-height:1.65;min-height:54px;max-height:130px;overflow-y:auto;color:#24292e}
+.url-base{color:#586069}
+.url-q{color:#0366d6}
+.stats{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.st{font-size:11px;padding:2px 8px;border-radius:20px;background:#f6f8fa;border:1px solid #e1e4e8;color:#586069}
+.st.warn{background:#fffbdd;border-color:#f1e05a;color:#735c0f}
+.st.ok{background:#dcffe4;border-color:#34d058;color:#22863a}
+.st.err{background:#ffeef0;border-color:#fdaeb7;color:#86181d}
+.vmsg{font-size:12px;padding:6px 10px;border-radius:6px;margin-top:6px;line-height:1.5}
+.vmsg.warn{background:#fffbdd;border:1px solid #f1e05a;color:#735c0f}
+.vmsg.err{background:#ffeef0;border:1px solid #fdaeb7;color:#86181d}
+.vmsg.ok{background:#dcffe4;border:1px solid #34d058;color:#176f2c}
+.act-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.btn{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:6px;border:1px solid #e1e4e8;background:#f6f8fa;color:#24292e;font-size:12px;cursor:pointer;transition:all .14s;white-space:nowrap;text-decoration:none}
+.btn:hover{background:#e1e4e8}
+.btn.pri{background:#0366d6;border-color:#0366d6;color:#fff}
+.btn.pri:hover{background:#0255b3}
+.btn.grn{background:#28a745;border-color:#28a745;color:#fff}
+.btn.grn:hover{background:#22863a}
+.btn.red{color:#cb2431}
+.btn.red:hover{background:#ffeef0;border-color:#cb2431}
+.explain{font-size:12px;line-height:1.7}
+.etok{padding:3px 8px;border-left:3px solid #0366d6;background:#f6f8fa;border-radius:0 4px 4px 0;margin-bottom:4px}
+.etok .ec{font-family:"SFMono-Regular",Consolas,monospace;font-size:11px;color:#0366d6;font-weight:700}
+.etok .ed{color:#586069;font-size:11px}
+.prgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.pr{padding:7px 9px;border:1px solid #e1e4e8;border-radius:6px;background:#f6f8fa;font-size:11px;cursor:pointer;text-align:left;transition:background .12s}
+.pr:hover{background:#f1f8ff;border-color:#0366d6}
+.pr-n{font-weight:600;color:#24292e;display:block;margin-bottom:1px}
+.pr-d{color:#586069;display:block;font-size:10px}
+.notif{position:fixed;top:16px;right:16px;background:#1b1f24;color:#cdd9e5;padding:9px 15px;border-radius:6px;font-size:12px;z-index:9999;opacity:0;transform:translateY(-8px);transition:opacity .2s,transform .2s;pointer-events:none;max-width:290px;line-height:1.5;border:1px solid #30363d}
+.notif.show{opacity:1;transform:translateY(0)}
+hr{border:none;border-top:1px solid #e1e4e8;margin:8px 0}
+.kw-pfx{width:72px;flex-shrink:0;font-size:10px;color:#586069;font-family:monospace;text-align:right;padding-right:2px}
+</style>
+</head>
+<body>
+<div id="notif" class="notif"></div>
+
+<header class="hdr">
+  <div class="hdr-logo">xsukax <span>Google Search Builder</span></div>
+  <div class="hdr-sub">Craft advanced Google searches — no syntax knowledge needed</div>
+</header>
+
+<div class="main">
+  <div class="lcol">
+
+    <!-- Keywords -->
+    <div class="card">
+      <div class="card-hdr open" onclick="toggleCard(this)">🔤 Keywords <span class="arr">▶</span></div>
+      <div class="card-body" id="kw-body">
+        <div class="lbl">Search Terms <i class="tip">?<span class="tipbox">Enter words to search. Use AND/OR/NOT buttons to combine multiple terms. Multi-word terms are auto-quoted.</span></i></div>
+        <div id="kw-rows"></div>
+        <button class="add-row" onclick="addKw()">＋ Add Keyword</button>
+      </div>
+    </div>
+
+    <!-- Exact Phrases -->
+    <div class="card">
+      <div class="card-hdr open" onclick="toggleCard(this)">💬 Exact Phrases <span class="arr">▶</span></div>
+      <div class="card-body" id="ph-body">
+        <div class="lbl">Quoted Phrase Match <i class="tip">?<span class="tipbox">Results must contain these exact words in this exact order. Automatically wrapped in quotes.</span></i></div>
+        <div id="ph-rows"></div>
+        <button class="add-row" onclick="addPh()">＋ Add Phrase</button>
+      </div>
+    </div>
+
+    <!-- Site/Domain -->
+    <div class="card">
+      <div class="card-hdr open" onclick="toggleCard(this)">🌐 Site / Domain <span class="arr">▶</span></div>
+      <div class="card-body" id="site-body">
+        <div class="lbl">Domain Filters <i class="tip">?<span class="tipbox">Toggle "site:" to include, "-site:" to exclude. Supports TLDs like .gov, .edu too.</span></i></div>
+        <div id="site-rows"></div>
+        <button class="add-row" onclick="addSite()">＋ Add Site / Domain</button>
+      </div>
+    </div>
+
+    <!-- inurl -->
+    <div class="card">
+      <div class="card-hdr" onclick="toggleCard(this)">🔗 URL Contains <span class="arr">▶</span></div>
+      <div class="card-body hide" id="inurl-body">
+        <div class="lbl">inurl Filter <i class="tip">?<span class="tipbox">Find pages where the URL contains (inurl:) or doesn't contain (-inurl:) specific words.</span></i></div>
+        <div id="inurl-rows"></div>
+        <button class="add-row" onclick="addInurl()">＋ Add URL Filter</button>
+      </div>
+    </div>
+
+    <!-- intitle -->
+    <div class="card">
+      <div class="card-hdr" onclick="toggleCard(this)">📑 Title Contains <span class="arr">▶</span></div>
+      <div class="card-body hide" id="intitle-body">
+        <div class="lbl">intitle Filter <i class="tip">?<span class="tipbox">Find pages whose &lt;title&gt; tag contains (intitle:) or doesn't contain (-intitle:) specific words.</span></i></div>
+        <div id="intitle-rows"></div>
+        <button class="add-row" onclick="addIntitle()">＋ Add Title Filter</button>
+      </div>
+    </div>
+
+    <!-- intext -->
+    <div class="card">
+      <div class="card-hdr" onclick="toggleCard(this)">📄 Body Text Contains <span class="arr">▶</span></div>
+      <div class="card-body hide" id="intext-body">
+        <div class="lbl">intext Filter <i class="tip">?<span class="tipbox">Find pages whose visible body text contains (intext:) or doesn't contain (-intext:) specific words.</span></i></div>
+        <div id="intext-rows"></div>
+        <button class="add-row" onclick="addIntext()">＋ Add Body Filter</button>
+      </div>
+    </div>
+
+    <!-- Proximity -->
+    <div class="card">
+      <div class="card-hdr" onclick="toggleCard(this)">↔️ Proximity Search <span class="arr">▶</span></div>
+      <div class="card-body hide" id="around-body">
+        <div class="lbl">AROUND(n) Operator <i class="tip">?<span class="tipbox">Two words must appear within N words of each other. Example: climate AROUND(5) change</span></i></div>
+        <div id="around-rows"></div>
+        <button class="add-row" onclick="addAround()">＋ Add Proximity Rule</button>
+      </div>
+    </div>
+
+    <!-- Numeric Range -->
+    <div class="card">
+      <div class="card-hdr" onclick="toggleCard(this)">🔢 Numeric Range <span class="arr">▶</span></div>
+      <div class="card-body hide" id="range-body">
+        <div class="lbl">Range (..) Operator <i class="tip">?<span class="tipbox">Find numbers in a range using the .. operator. Example: $500..$1000 or 2018..2023</span></i></div>
+        <div id="range-rows"></div>
+        <button class="add-row" onclick="addRange()">＋ Add Range</button>
+      </div>
+    </div>
+
+    <!-- File Type -->
+    <div class="card">
+      <div class="card-hdr" onclick="toggleCard(this)">📁 File Type <span class="arr">▶</span></div>
+      <div class="card-body hide" id="ft-body">
+        <div class="lbl">filetype: Filter <i class="tip">?<span class="tipbox">Restrict results to a specific file format. Select from 35+ types or type a custom extension.</span></i></div>
+        <div class="row">
+          <select id="ft-sel" onchange="onFtSel()"><option value="">— Select file type —</option></select>
+          <input type="text" id="ft-cust" placeholder="Custom ext (e.g. epub)" style="flex:0 0 140px" oninput="S.ftc=this.value.trim();document.getElementById('ft-sel').value='';S.ft='';update()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Special Operators -->
+    <div class="card">
+      <div class="card-hdr" onclick="toggleCard(this)">⚡ Special Operators <span class="arr">▶</span></div>
+      <div class="card-body hide" id="special-body">
+        <div class="g2">
+          <div>
+            <div class="lbl">related: <i class="tip">?<span class="tipbox">Find sites similar to a given URL. Example: related:nytimes.com</span></i></div>
+            <input type="text" id="related" placeholder="e.g. reddit.com" oninput="update()">
+          </div>
+          <div>
+            <div class="lbl">cache: <i class="tip">?<span class="tipbox">Show Google's cached snapshot of this specific URL.</span></i></div>
+            <input type="text" id="cache" placeholder="e.g. example.com/page" oninput="update()">
+          </div>
+        </div>
+        <div style="margin-top:8px">
+          <div class="lbl">define: <i class="tip">?<span class="tipbox">Show the dictionary definition for a word or phrase.</span></i></div>
+          <input type="text" id="define" placeholder="e.g. serendipity" oninput="update()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Date Filtering -->
+    <div class="card">
+      <div class="card-hdr" onclick="toggleCard(this)">📅 Date Filtering <span class="arr">▶</span></div>
+      <div class="card-body hide" id="date-body">
+        <div class="dtabs">
+          <div class="dtab active" data-mode="none" onclick="setDateTab(this)">None</div>
+          <div class="dtab" data-mode="quick" onclick="setDateTab(this)">Quick</div>
+          <div class="dtab" data-mode="custom" onclick="setDateTab(this)">Custom</div>
+          <div class="dtab" data-mode="range" onclick="setDateTab(this)">Date Range</div>
+        </div>
+        <div class="dtab-body show" id="dt-none"><p style="color:#586069;font-size:12px">No date filtering applied.</p></div>
+        <div class="dtab-body" id="dt-quick">
+          <div class="lbl">Preset Time Window</div>
+          <div class="chips" id="quick-chips"></div>
+        </div>
+        <div class="dtab-body" id="dt-custom">
+          <div class="lbl">Custom Amount</div>
+          <div class="row">
+            <input type="number" id="cust-amt" min="1" placeholder="e.g. 3" oninput="update()">
+            <select id="cust-unit" onchange="update()">
+              <option value="h">Hours</option>
+              <option value="d">Days</option>
+              <option value="m">Months</option>
+              <option value="y">Years</option>
+            </select>
+          </div>
+        </div>
+        <div class="dtab-body" id="dt-range">
+          <div class="lbl">Specific Date Range <i class="tip">?<span class="tipbox">Dates are converted to Julian Day Numbers for the Google daterange: operator.</span></i></div>
+          <div class="g2">
+            <div><div class="sub-lbl">From</div><input type="date" id="date-from" onchange="update()"></div>
+            <div><div class="sub-lbl">To</div><input type="date" id="date-to" onchange="update()"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Settings -->
+    <div class="card">
+      <div class="card-hdr open" onclick="toggleCard(this)">⚙️ Search Settings <span class="arr">▶</span></div>
+      <div class="card-body" id="settings-body">
+        <div class="lbl">Search Type</div>
+        <div class="chips" id="type-chips"></div>
+        <div class="g3">
+          <div>
+            <div class="lbl">Results / Page</div>
+            <select id="num-res" onchange="update()">
+              <option value="">Default</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+          <div>
+            <div class="lbl">SafeSearch</div>
+            <select id="safe" onchange="update()">
+              <option value="">Default</option>
+              <option value="active">On</option>
+              <option value="off">Off</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Language & Region -->
+    <div class="card">
+      <div class="card-hdr" onclick="toggleCard(this)">🗺️ Language & Region <span class="arr">▶</span></div>
+      <div class="card-body hide" id="lang-body">
+        <div class="g2">
+          <div>
+            <div class="lbl">Result Language (lr=) <i class="tip">?<span class="tipbox">Filter results to a specific language.</span></i></div>
+            <select id="lang-sel" onchange="update()"><option value="">Any language</option></select>
+          </div>
+          <div>
+            <div class="lbl">Country / Region (gl=) <i class="tip">?<span class="tipbox">Boost results from a specific country or region.</span></i></div>
+            <select id="country-sel" onchange="update()"><option value="">Any country</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.lcol -->
+
+  <!-- RIGHT COLUMN -->
+  <div class="rcol">
+
+    <!-- Presets -->
+    <div class="card">
+      <div class="card-hdr open" onclick="toggleCard(this)">⚡ Quick Presets <span class="arr">▶</span></div>
+      <div class="card-body" id="preset-body">
+        <div class="prgrid" id="preset-grid"></div>
+      </div>
+    </div>
+
+    <!-- URL Output -->
+    <div class="card">
+      <div class="card-hdr open" onclick="toggleCard(this)">🔗 Generated URL <span class="arr">▶</span></div>
+      <div class="card-body" id="url-out-body">
+        <div class="url-box" id="url-box"><span style="color:#586069;font-style:italic">Start building your query to see the URL…</span></div>
+        <div class="stats" id="stats-bar"></div>
+        <div id="v-msg"></div>
+        <div class="act-row">
+          <button class="btn pri" onclick="copyURL()">📋 Copy URL</button>
+          <button class="btn" onclick="copyQuery()">📝 Copy Query</button>
+          <button class="btn grn" onclick="openGoogle()">🔍 Open in Google</button>
+        </div>
+        <div class="act-row">
+          <button class="btn" onclick="copyAppURL()">🔗 Share App URL</button>
+          <button class="btn red" onclick="resetAll()">🗑️ Reset All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="card">
+      <div class="card-hdr" onclick="toggleCard(this)">📖 Plain-English Explanation <span class="arr">▶</span></div>
+      <div class="card-body hide" id="explain-body">
+        <div class="explain" id="explain-content"><span style="color:#586069;font-style:italic">Build a query to see its explanation…</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// xsukax Google Search Builder
+// Copyright (C) xsukax — GPL-3.0 License
+// https://www.gnu.org/licenses/gpl-3.0.html
+
+const FILETYPES = ['7z','asp','aspx','avi','c','cpp','csv','css','doc','docx','epub','gif','gz','h','htm','html','java','jpg','jpeg','js','json','log','md','mkv','mobi','mov','mp3','mp4','odt','ods','odp','pdf','php','png','ppt','pptx','py','rar','rtf','sql','svg','tar','txt','webp','xls','xlsx','xml','zip'];
+
+const LANGUAGES = [
+  {c:'lang_af',n:'Afrikaans'},{c:'lang_am',n:'Amharic'},{c:'lang_ar',n:'Arabic'},{c:'lang_bg',n:'Bulgarian'},{c:'lang_bn',n:'Bengali'},
+  {c:'lang_ca',n:'Catalan'},{c:'lang_cs',n:'Czech'},{c:'lang_cy',n:'Welsh'},{c:'lang_da',n:'Danish'},
+  {c:'lang_de',n:'German'},{c:'lang_el',n:'Greek'},{c:'lang_en',n:'English'},{c:'lang_es',n:'Spanish'},
+  {c:'lang_et',n:'Estonian'},{c:'lang_fa',n:'Persian'},{c:'lang_fi',n:'Finnish'},{c:'lang_fil',n:'Filipino'},
+  {c:'lang_fr',n:'French'},{c:'lang_gu',n:'Gujarati'},{c:'lang_he',n:'Hebrew'},{c:'lang_hi',n:'Hindi'},
+  {c:'lang_hr',n:'Croatian'},{c:'lang_hu',n:'Hungarian'},{c:'lang_id',n:'Indonesian'},{c:'lang_is',n:'Icelandic'},
+  {c:'lang_it',n:'Italian'},{c:'lang_ja',n:'Japanese'},{c:'lang_kn',n:'Kannada'},{c:'lang_ko',n:'Korean'},
+  {c:'lang_lt',n:'Lithuanian'},{c:'lang_lv',n:'Latvian'},{c:'lang_mk',n:'Macedonian'},{c:'lang_ml',n:'Malayalam'},
+  {c:'lang_mr',n:'Marathi'},{c:'lang_ms',n:'Malay'},{c:'lang_mt',n:'Maltese'},{c:'lang_nl',n:'Dutch'},
+  {c:'lang_no',n:'Norwegian'},{c:'lang_pl',n:'Polish'},{c:'lang_pt',n:'Portuguese'},{c:'lang_ro',n:'Romanian'},
+  {c:'lang_ru',n:'Russian'},{c:'lang_sk',n:'Slovak'},{c:'lang_sl',n:'Slovenian'},{c:'lang_sq',n:'Albanian'},
+  {c:'lang_sr',n:'Serbian'},{c:'lang_sv',n:'Swedish'},{c:'lang_sw',n:'Swahili'},{c:'lang_ta',n:'Tamil'},
+  {c:'lang_te',n:'Telugu'},{c:'lang_th',n:'Thai'},{c:'lang_tr',n:'Turkish'},{c:'lang_uk',n:'Ukrainian'},
+  {c:'lang_ur',n:'Urdu'},{c:'lang_vi',n:'Vietnamese'},{c:'lang_zh-CN',n:'Chinese (Simplified)'},
+  {c:'lang_zh-TW',n:'Chinese (Traditional)'},{c:'lang_zu',n:'Zulu'}
+];
+
+const COUNTRIES = [
+  {c:'af',n:'🇦🇫 Afghanistan'},{c:'al',n:'🇦🇱 Albania'},{c:'dz',n:'🇩🇿 Algeria'},{c:'ar',n:'🇦🇷 Argentina'},
+  {c:'au',n:'🇦🇺 Australia'},{c:'at',n:'🇦🇹 Austria'},{c:'az',n:'🇦🇿 Azerbaijan'},{c:'bh',n:'🇧🇭 Bahrain'},
+  {c:'bd',n:'🇧🇩 Bangladesh'},{c:'by',n:'🇧🇾 Belarus'},{c:'be',n:'🇧🇪 Belgium'},{c:'br',n:'🇧🇷 Brazil'},
+  {c:'bg',n:'🇧🇬 Bulgaria'},{c:'ca',n:'🇨🇦 Canada'},{c:'cl',n:'🇨🇱 Chile'},{c:'cn',n:'🇨🇳 China'},
+  {c:'co',n:'🇨🇴 Colombia'},{c:'hr',n:'🇭🇷 Croatia'},{c:'cz',n:'🇨🇿 Czech Republic'},{c:'dk',n:'🇩🇰 Denmark'},
+  {c:'eg',n:'🇪🇬 Egypt'},{c:'ee',n:'🇪🇪 Estonia'},{c:'et',n:'🇪🇹 Ethiopia'},{c:'fi',n:'🇫🇮 Finland'},
+  {c:'fr',n:'🇫🇷 France'},{c:'ge',n:'🇬🇪 Georgia'},{c:'de',n:'🇩🇪 Germany'},{c:'gh',n:'🇬🇭 Ghana'},
+  {c:'gr',n:'🇬🇷 Greece'},{c:'hk',n:'🇭🇰 Hong Kong'},{c:'hu',n:'🇭🇺 Hungary'},{c:'in',n:'🇮🇳 India'},
+  {c:'id',n:'🇮🇩 Indonesia'},{c:'iq',n:'🇮🇶 Iraq'},{c:'ie',n:'🇮🇪 Ireland'},{c:'il',n:'🇮🇱 Israel'},
+  {c:'it',n:'🇮🇹 Italy'},{c:'jp',n:'🇯🇵 Japan'},{c:'jo',n:'🇯🇴 Jordan'},{c:'kz',n:'🇰🇿 Kazakhstan'},
+  {c:'ke',n:'🇰🇪 Kenya'},{c:'kw',n:'🇰🇼 Kuwait'},{c:'lv',n:'🇱🇻 Latvia'},{c:'lb',n:'🇱🇧 Lebanon'},
+  {c:'ly',n:'🇱🇾 Libya'},{c:'lt',n:'🇱🇹 Lithuania'},{c:'lu',n:'🇱🇺 Luxembourg'},{c:'my',n:'🇲🇾 Malaysia'},
+  {c:'mx',n:'🇲🇽 Mexico'},{c:'ma',n:'🇲🇦 Morocco'},{c:'nl',n:'🇳🇱 Netherlands'},{c:'nz',n:'🇳🇿 New Zealand'},
+  {c:'ng',n:'🇳🇬 Nigeria'},{c:'no',n:'🇳🇴 Norway'},{c:'om',n:'🇴🇲 Oman'},{c:'pk',n:'🇵🇰 Pakistan'},
+  {c:'ps',n:'🇵🇸 Palestine'},{c:'pe',n:'🇵🇪 Peru'},{c:'ph',n:'🇵🇭 Philippines'},{c:'pl',n:'🇵🇱 Poland'},
+  {c:'pt',n:'🇵🇹 Portugal'},{c:'qa',n:'🇶🇦 Qatar'},{c:'ro',n:'🇷🇴 Romania'},{c:'ru',n:'🇷🇺 Russia'},
+  {c:'sa',n:'🇸🇦 Saudi Arabia'},{c:'rs',n:'🇷🇸 Serbia'},{c:'sg',n:'🇸🇬 Singapore'},{c:'sk',n:'🇸🇰 Slovakia'},
+  {c:'za',n:'🇿🇦 South Africa'},{c:'kr',n:'🇰🇷 South Korea'},{c:'es',n:'🇪🇸 Spain'},{c:'sd',n:'🇸🇩 Sudan'},
+  {c:'se',n:'🇸🇪 Sweden'},{c:'ch',n:'🇨🇭 Switzerland'},{c:'tw',n:'🇹🇼 Taiwan'},{c:'th',n:'🇹🇭 Thailand'},
+  {c:'tn',n:'🇹🇳 Tunisia'},{c:'tr',n:'🇹🇷 Turkey'},{c:'ua',n:'🇺🇦 Ukraine'},{c:'ae',n:'🇦🇪 UAE'},
+  {c:'gb',n:'🇬🇧 United Kingdom'},{c:'us',n:'🇺🇸 United States'},{c:'uy',n:'🇺🇾 Uruguay'},{c:'vn',n:'🇻🇳 Vietnam'},
+  {c:'ye',n:'🇾🇪 Yemen'},{c:'zm',n:'🇿🇲 Zambia'},{c:'zw',n:'🇿🇼 Zimbabwe'}
+];
+
+const SEARCH_TYPES = [
+  {c:'',n:'🌐 Web'},{c:'isch',n:'🖼️ Images'},{c:'nws',n:'📰 News'},
+  {c:'vid',n:'🎬 Videos'},{c:'bks',n:'📚 Books'},{c:'shop',n:'🛍️ Shopping'}
+];
+
+const QUICK_DATE = [
+  {c:'h1',n:'Past hour'},{c:'d1',n:'Past 24h'},{c:'d3',n:'Past 3 days'},
+  {c:'w1',n:'Past week'},{c:'m1',n:'Past month'},{c:'m3',n:'Past 3 months'},
+  {c:'m6',n:'Past 6 months'},{c:'y1',n:'Past year'},{c:'y2',n:'Past 2 years'},{c:'y5',n:'Past 5 years'}
+];
+
+const PRESETS_DATA = [
+  {n:'📄 PDF Finder',d:'Downloadable documents',fn(){resetAll(true);_kwSet('research');_ftSet('pdf');update();notify('📄 PDF Finder applied')}},
+  {n:'📰 Latest News',d:'Recent news on a topic',fn(){resetAll(true);_dtQuick('d1');_typeSet('nws');update();notify('📰 Latest News applied')}},
+  {n:'🎓 Academic Papers',d:'Scholarly research & journals',fn(){resetAll(true);_kwSet('research');_siteAdd('scholar.google.com',false);_ftSet('pdf');update();notify('🎓 Academic Papers applied')}},
+  {n:'💼 Job Listings',d:'Find job postings',fn(){resetAll(true);_kwSet('developer');_inurlAdd('jobs',false);_inurlAdd('careers',false);update();notify('💼 Job Listings applied')}},
+  {n:'📂 Open Directories',d:'Index of / file listings',fn(){resetAll(true);_intitleAdd('index of',false);_inurlAdd('/',false);update();notify('📂 Open Directories applied')}},
+  {n:'💰 Price Range',d:'Shopping within a budget',fn(){resetAll(true);_rangeAdd('$50','$200');_typeSet('shop');update();notify('💰 Price Range applied')}},
+  {n:'📝 Recent Articles',d:'Blog posts from past month',fn(){resetAll(true);_inurlAdd('blog',false);_dtQuick('m1');update();notify('📝 Recent Articles applied')}},
+  {n:'🔍 Deep Site Search',d:'Search within one website',fn(){resetAll(true);_siteAdd('example.com',false);update();notify('🔍 Deep Site Search applied — replace example.com')}}
+];
+
+// State
+const S = {
+  kw:[{v:'',op:'AND'}], ph:[''], sites:[{v:'',ex:false}],
+  inurls:[{v:'',ex:false}], intitles:[{v:'',ex:false}], intexts:[{v:'',ex:false}],
+  arounds:[{w1:'',w2:'',n:5}], ranges:[{from:'',to:''}],
+  ft:'', ftc:'', related:'', cache:'', define:'',
+  dateMode:'none', quickDate:'', custAmt:'', custUnit:'h', dateFrom:'', dateTo:'',
+  searchType:'', numRes:'', safe:'', lang:'', country:''
+};
+
+// Julian date conversion for daterange:
+function toJulian(ds){
+  const[Y,M,D]=ds.split('-').map(Number);
+  let y=Y,m=M;
+  if(m<=2){y--;m+=12;}
+  const A=Math.floor(y/100),B=2-A+Math.floor(A/4);
+  return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+D+B-1524;
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// Build query string
+function buildQuery(){
+  const parts=[];
+  S.kw.filter(k=>k.v.trim()).forEach((k,i)=>{
+    const v=k.v.trim();
+    const qv=v.includes(' ')&&!/^".*"$/.test(v)?`"${v}"`:v;
+    if(i===0) parts.push(qv);
+    else if(k.op==='OR') parts.push(`OR ${qv}`);
+    else if(k.op==='NOT') parts.push(`-${qv}`);
+    else parts.push(qv);
+  });
+  S.ph.filter(p=>p.trim()).forEach(p=>parts.push(`"${p.trim()}"`));
+  S.sites.filter(s=>s.v.trim()).forEach(s=>parts.push(`${s.ex?'-':''}site:${s.v.trim()}`));
+  S.inurls.filter(u=>u.v.trim()).forEach(u=>parts.push(`${u.ex?'-':''}inurl:${u.v.trim()}`));
+  S.intitles.filter(t=>t.v.trim()).forEach(t=>{const v=t.v.trim();parts.push(`${t.ex?'-':''}intitle:${v.includes(' ')?`"${v}"`:v}`);});
+  S.intexts.filter(x=>x.v.trim()).forEach(x=>{const v=x.v.trim();parts.push(`${x.ex?'-':''}intext:${v.includes(' ')?`"${v}"`:v}`);});
+  S.arounds.filter(a=>a.w1.trim()&&a.w2.trim()).forEach(a=>parts.push(`${a.w1.trim()} AROUND(${a.n||5}) ${a.w2.trim()}`));
+  S.ranges.filter(r=>String(r.from).trim()&&String(r.to).trim()).forEach(r=>parts.push(`${r.from}..${r.to}`));
+  const ft=S.ftc||S.ft;
+  if(ft) parts.push(`filetype:${ft}`);
+  if(S.related.trim()) parts.push(`related:${S.related.trim()}`);
+  if(S.cache.trim()) parts.push(`cache:${S.cache.trim()}`);
+  if(S.define.trim()) parts.push(`define:${S.define.trim()}`);
+  if(S.dateMode==='range'&&S.dateFrom&&S.dateTo){
+    try{parts.push(`daterange:${toJulian(S.dateFrom)}-${toJulian(S.dateTo)}`);}catch(e){}
+  }
+  return parts.join(' ');
+}
+
+function buildGoogleURL(){
+  const q=buildQuery();
+  const p=new URLSearchParams();
+  if(q) p.set('q',q);
+  if(S.searchType) p.set('tbm',S.searchType);
+  if(S.numRes) p.set('num',S.numRes);
+  if(S.safe) p.set('safe',S.safe);
+  if(S.lang) p.set('lr',S.lang);
+  if(S.country) p.set('gl',S.country);
+  if(S.dateMode==='quick'&&S.quickDate) p.set('tbs',`qdr:${S.quickDate}`);
+  else if(S.dateMode==='custom'&&S.custAmt) p.set('tbs',`qdr:${S.custUnit}${S.custAmt}`);
+  const str=p.toString();
+  return str?`https://www.google.com/search?${str}`:'';
+}
+
+function readDOM(){
+  S.ft=document.getElementById('ft-sel').value;
+  S.ftc=document.getElementById('ft-cust').value.trim();
+  S.related=document.getElementById('related').value;
+  S.cache=document.getElementById('cache').value;
+  S.define=document.getElementById('define').value;
+  S.numRes=document.getElementById('num-res').value;
+  S.safe=document.getElementById('safe').value;
+  S.lang=document.getElementById('lang-sel').value;
+  S.country=document.getElementById('country-sel').value;
+  S.custAmt=document.getElementById('cust-amt').value;
+  S.custUnit=document.getElementById('cust-unit').value;
+  S.dateFrom=document.getElementById('date-from').value;
+  S.dateTo=document.getElementById('date-to').value;
+}
+
+function countOps(q){
+  if(!q) return 0;
+  let n=0;
+  [/\bsite:/g,/-site:/g,/\binurl:/g,/-inurl:/g,/\bintitle:/g,/-intitle:/g,/\bintext:/g,/-intext:/g,/\bfiletype:/g,/\brelated:/g,/\bcache:/g,/\bdefine:/g,/\bdaterange:/g,/\bAROUND\(/g,/\.\.(?!\d)/g,/\bOR\b/g,/^-[^-]/gm].forEach(re=>{const m=q.match(re);if(m)n+=m.length;});
+  return n;
+}
+
+function update(){
+  readDOM();
+  const q=buildQuery(), url=buildGoogleURL();
+  const box=document.getElementById('url-box');
+  if(url){
+    const qi=url.indexOf('?');
+    box.innerHTML=`<span class="url-base">${esc(url.substring(0,qi+1))}</span><span class="url-q">${esc(url.substring(qi+1))}</span>`;
+  } else {
+    box.innerHTML='<span style="color:#586069;font-style:italic">Start building your query to see the URL…</span>';
+  }
+  const ulen=url.length, qlen=q.length, ops=countOps(q);
+  const typeLabel=(SEARCH_TYPES.find(t=>t.c===S.searchType)||SEARCH_TYPES[0]).n;
+  document.getElementById('stats-bar').innerHTML=
+    `<span class="st">⚙️ Operators: ${ops}</span>`+
+    `<span class="st">📝 Query: ${qlen} chars</span>`+
+    `<span class="st ${ulen>2048?'err':ulen>1800?'warn':'ok'}">🔗 URL: ${ulen} chars</span>`+
+    `<span class="st">${typeLabel}</span>`;
+  const warns=[];
+  if(ulen>2048) warns.push({t:'err',m:'⚠️ URL exceeds 2048 characters — some browsers may truncate it.'});
+  else if(ulen>1800) warns.push({t:'warn',m:'⚠️ URL is getting long (over 1800 chars). Consider simplifying.'});
+  const incSites=S.sites.filter(s=>!s.ex&&s.v.trim()).map(s=>s.v.trim().toLowerCase());
+  const exSites=S.sites.filter(s=>s.ex&&s.v.trim()).map(s=>s.v.trim().toLowerCase());
+  incSites.forEach(s=>{if(exSites.includes(s))warns.push({t:'warn',m:`⚠️ Conflict: "${s}" is both included and excluded.`});});
+  if(!q&&url) warns.push({t:'warn',m:'ℹ️ No query text — only settings or filters applied.'});
+  if(q&&!warns.length) warns.push({t:'ok',m:'✅ Query looks valid and ready to use!'});
+  document.getElementById('v-msg').innerHTML=warns.map(w=>`<div class="vmsg ${w.t}">${w.m}</div>`).join('');
+  updateExplain();
+}
+
+function updateExplain(){
+  const el=document.getElementById('explain-content');
+  const toks=[];
+  S.kw.filter(k=>k.v.trim()).forEach((k,i)=>{
+    const v=k.v.trim();
+    if(i===0) toks.push({c:v,d:`Search for the keyword <strong>${esc(v)}</strong>`});
+    else if(k.op==='OR') toks.push({c:`OR ${v}`,d:`Or show results also containing <strong>${esc(v)}</strong>`});
+    else if(k.op==='NOT') toks.push({c:`−${v}`,d:`Exclude all results containing <strong>${esc(v)}</strong>`});
+    else toks.push({c:v,d:`AND also find <strong>${esc(v)}</strong>`});
+  });
+  S.ph.filter(p=>p.trim()).forEach(p=>toks.push({c:`"${p}"`,d:`Match the exact phrase <strong>${esc(p)}</strong> — word order matters`}));
+  S.sites.filter(s=>s.v.trim()).forEach(s=>{
+    if(s.ex) toks.push({c:`-site:${s.v}`,d:`Exclude all results from the domain <strong>${esc(s.v)}</strong>`});
+    else toks.push({c:`site:${s.v}`,d:`Only show results from <strong>${esc(s.v)}</strong>`});
+  });
+  S.inurls.filter(u=>u.v.trim()).forEach(u=>{
+    if(u.ex) toks.push({c:`-inurl:${u.v}`,d:`Exclude pages whose URL contains <strong>${esc(u.v)}</strong>`});
+    else toks.push({c:`inurl:${u.v}`,d:`Page URL must contain the word <strong>${esc(u.v)}</strong>`});
+  });
+  S.intitles.filter(t=>t.v.trim()).forEach(t=>{
+    if(t.ex) toks.push({c:`-intitle:${t.v}`,d:`Exclude pages with <strong>${esc(t.v)}</strong> in the title`});
+    else toks.push({c:`intitle:${t.v}`,d:`Page title must contain <strong>${esc(t.v)}</strong>`});
+  });
+  S.intexts.filter(x=>x.v.trim()).forEach(x=>{
+    if(x.ex) toks.push({c:`-intext:${x.v}`,d:`Exclude pages with <strong>${esc(x.v)}</strong> in the body text`});
+    else toks.push({c:`intext:${x.v}`,d:`Page body must contain the text <strong>${esc(x.v)}</strong>`});
+  });
+  S.arounds.filter(a=>a.w1.trim()&&a.w2.trim()).forEach(a=>toks.push({c:`${a.w1} AROUND(${a.n}) ${a.w2}`,d:`<strong>${esc(a.w1)}</strong> and <strong>${esc(a.w2)}</strong> must appear within ${a.n} words of each other`}));
+  S.ranges.filter(r=>String(r.from).trim()&&String(r.to).trim()).forEach(r=>toks.push({c:`${r.from}..${r.to}`,d:`Find results containing a number between <strong>${r.from}</strong> and <strong>${r.to}</strong>`}));
+  const ft=S.ftc||S.ft;
+  if(ft) toks.push({c:`filetype:${ft}`,d:`Only show <strong>${ft.toUpperCase()}</strong> file results`});
+  if(S.related.trim()) toks.push({c:`related:${S.related}`,d:`Find websites similar to <strong>${esc(S.related)}</strong>`});
+  if(S.cache.trim()) toks.push({c:`cache:${S.cache}`,d:`Show Google's cached snapshot of <strong>${esc(S.cache)}</strong>`});
+  if(S.define.trim()) toks.push({c:`define:${S.define}`,d:`Show the dictionary definition of <strong>${esc(S.define)}</strong>`});
+  if(S.dateMode==='range'&&S.dateFrom&&S.dateTo){try{toks.push({c:`daterange:${toJulian(S.dateFrom)}-${toJulian(S.dateTo)}`,d:`Results published between <strong>${S.dateFrom}</strong> and <strong>${S.dateTo}</strong> (Julian format)`});}catch(e){}}
+  if(S.searchType){const t=SEARCH_TYPES.find(x=>x.c===S.searchType);if(t)toks.push({c:`tbm=${S.searchType}`,d:`Search within <strong>${t.n}</strong> results`});}
+  if(S.dateMode==='quick'&&S.quickDate){const d=QUICK_DATE.find(x=>x.c===S.quickDate);if(d)toks.push({c:`tbs=qdr:${S.quickDate}`,d:`Limit results to: <strong>${d.n}</strong>`});}
+  if(S.dateMode==='custom'&&S.custAmt){const u={h:'hours',d:'days',m:'months',y:'years'};toks.push({c:`tbs=qdr:${S.custUnit}${S.custAmt}`,d:`Results from the past <strong>${S.custAmt} ${u[S.custUnit]}</strong>`});}
+  if(S.lang){const l=LANGUAGES.find(x=>x.c===S.lang);if(l)toks.push({c:`lr=${S.lang}`,d:`Filter results by language: <strong>${l.n}</strong>`});}
+  if(S.country){const co=COUNTRIES.find(x=>x.c===S.country);if(co)toks.push({c:`gl=${S.country}`,d:`Boost results from: <strong>${co.n}</strong>`});}
+  if(S.safe) toks.push({c:`safe=${S.safe}`,d:`SafeSearch is <strong>${S.safe==='active'?'ON (filter explicit content)':'OFF (unfiltered)'}</strong>`});
+  if(S.numRes) toks.push({c:`num=${S.numRes}`,d:`Show <strong>${S.numRes}</strong> results per page`});
+  el.innerHTML=toks.length?toks.map(t=>`<div class="etok"><span class="ec">${t.c}</span> <span class="ed">— ${t.d}</span></div>`).join(''):'<span style="color:#586069;font-style:italic">No active operators yet.</span>';
+}
+
+// Render rows
+function renderKw(){
+  document.getElementById('kw-rows').innerHTML=S.kw.map((k,i)=>`
+    <div class="row">
+      ${i===0?`<span class="kw-pfx" style="font-size:11px;color:#586069">keyword</span>`:`<div class="op-wrap">
+        <button class="op${k.op==='AND'?' and':''}" onclick="S.kw[${i}].op='AND';renderKw();update()">AND</button>
+        <button class="op${k.op==='OR'?' or':''}" onclick="S.kw[${i}].op='OR';renderKw();update()">OR</button>
+        <button class="op${k.op==='NOT'?' not':''}" onclick="S.kw[${i}].op='NOT';renderKw();update()">NOT</button>
+      </div>`}
+      <input type="text" value="${esc(k.v)}" placeholder="Enter keyword…" oninput="S.kw[${i}].v=this.value;update()">
+      ${S.kw.length>1?`<button class="rm" onclick="S.kw.splice(${i},1);renderKw();update()" title="Remove">×</button>`:''}
+    </div>`).join('');
+}
+function renderPh(){
+  document.getElementById('ph-rows').innerHTML=S.ph.map((p,i)=>`
+    <div class="row">
+      <input type="text" value="${esc(p)}" placeholder='Exact phrase…' oninput="S.ph[${i}]=this.value;update()">
+      ${S.ph.length>1?`<button class="rm" onclick="S.ph.splice(${i},1);renderPh();update()">×</button>`:''}
+    </div>`).join('');
+}
+function renderSites(){
+  document.getElementById('site-rows').innerHTML=S.sites.map((s,i)=>`
+    <div class="row">
+      <button class="ex${s.ex?' on':''}" onclick="S.sites[${i}].ex=!S.sites[${i}].ex;renderSites();update()">${s.ex?'−site:':'site:'}</button>
+      <input type="text" value="${esc(s.v)}" placeholder="e.g. reddit.com or .gov" oninput="S.sites[${i}].v=this.value;update()">
+      ${S.sites.length>1?`<button class="rm" onclick="S.sites.splice(${i},1);renderSites();update()">×</button>`:''}
+    </div>`).join('');
+}
+function renderInurls(){
+  document.getElementById('inurl-rows').innerHTML=S.inurls.map((u,i)=>`
+    <div class="row">
+      <button class="ex${u.ex?' on':''}" onclick="S.inurls[${i}].ex=!S.inurls[${i}].ex;renderInurls();update()">${u.ex?'−inurl:':'inurl:'}</button>
+      <input type="text" value="${esc(u.v)}" placeholder="e.g. blog" oninput="S.inurls[${i}].v=this.value;update()">
+      ${S.inurls.length>1?`<button class="rm" onclick="S.inurls.splice(${i},1);renderInurls();update()">×</button>`:''}
+    </div>`).join('');
+}
+function renderIntitles(){
+  document.getElementById('intitle-rows').innerHTML=S.intitles.map((t,i)=>`
+    <div class="row">
+      <button class="ex${t.ex?' on':''}" onclick="S.intitles[${i}].ex=!S.intitles[${i}].ex;renderIntitles();update()">${t.ex?'−intitle:':'intitle:'}</button>
+      <input type="text" value="${esc(t.v)}" placeholder="e.g. annual report" oninput="S.intitles[${i}].v=this.value;update()">
+      ${S.intitles.length>1?`<button class="rm" onclick="S.intitles.splice(${i},1);renderIntitles();update()">×</button>`:''}
+    </div>`).join('');
+}
+function renderIntexts(){
+  document.getElementById('intext-rows').innerHTML=S.intexts.map((x,i)=>`
+    <div class="row">
+      <button class="ex${x.ex?' on':''}" onclick="S.intexts[${i}].ex=!S.intexts[${i}].ex;renderIntexts();update()">${x.ex?'−intext:':'intext:'}</button>
+      <input type="text" value="${esc(x.v)}" placeholder="e.g. climate change" oninput="S.intexts[${i}].v=this.value;update()">
+      ${S.intexts.length>1?`<button class="rm" onclick="S.intexts.splice(${i},1);renderIntexts();update()">×</button>`:''}
+    </div>`).join('');
+}
+function renderArounds(){
+  document.getElementById('around-rows').innerHTML=S.arounds.map((a,i)=>`
+    <div class="row">
+      <input type="text" value="${esc(a.w1)}" placeholder="Word 1" style="flex:1" oninput="S.arounds[${i}].w1=this.value;update()">
+      <span style="font-size:10px;color:#586069;flex-shrink:0;font-family:monospace">AROUND</span>
+      <input type="number" value="${a.n}" min="1" max="50" oninput="S.arounds[${i}].n=+this.value;update()">
+      <input type="text" value="${esc(a.w2)}" placeholder="Word 2" style="flex:1" oninput="S.arounds[${i}].w2=this.value;update()">
+      ${S.arounds.length>1?`<button class="rm" onclick="S.arounds.splice(${i},1);renderArounds();update()">×</button>`:''}
+    </div>`).join('');
+}
+function renderRanges(){
+  document.getElementById('range-rows').innerHTML=S.ranges.map((r,i)=>`
+    <div class="row">
+      <input type="text" value="${esc(r.from)}" placeholder="From (e.g. 100)" style="flex:1" oninput="S.ranges[${i}].from=this.value;update()">
+      <span style="font-size:12px;font-weight:700;color:#586069;flex-shrink:0">..</span>
+      <input type="text" value="${esc(r.to)}" placeholder="To (e.g. 500)" style="flex:1" oninput="S.ranges[${i}].to=this.value;update()">
+      ${S.ranges.length>1?`<button class="rm" onclick="S.ranges.splice(${i},1);renderRanges();update()">×</button>`:''}
+    </div>`).join('');
+}
+
+function addKw(){S.kw.push({v:'',op:'AND'});renderKw();}
+function addPh(){S.ph.push('');renderPh();}
+function addSite(){S.sites.push({v:'',ex:false});renderSites();}
+function addInurl(){S.inurls.push({v:'',ex:false});renderInurls();}
+function addIntitle(){S.intitles.push({v:'',ex:false});renderIntitles();}
+function addIntext(){S.intexts.push({v:'',ex:false});renderIntexts();}
+function addAround(){S.arounds.push({w1:'',w2:'',n:5});renderArounds();}
+function addRange(){S.ranges.push({from:'',to:''});renderRanges();}
+
+function onFtSel(){S.ftc='';document.getElementById('ft-cust').value='';update();}
+
+function setDateTab(el){
+  const mode=el.dataset.mode;
+  S.dateMode=mode;
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.dtab-body').forEach(b=>b.classList.remove('show'));
+  document.getElementById('dt-'+mode).classList.add('show');
+  update();
+}
+
+function toggleCard(hdr){
+  hdr.nextElementSibling.classList.toggle('hide');
+  hdr.classList.toggle('open');
+}
+
+let ntimer;
+function notify(msg){
+  const el=document.getElementById('notif');
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(ntimer);
+  ntimer=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+function copyURL(){
+  const u=buildGoogleURL();
+  if(!u){notify('⚠️ Nothing to copy — build a query first');return;}
+  navigator.clipboard.writeText(u).then(()=>notify('✅ Google URL copied!'));
+}
+function copyQuery(){
+  const q=buildQuery();
+  if(!q){notify('⚠️ Nothing to copy — build a query first');return;}
+  navigator.clipboard.writeText(q).then(()=>notify('✅ Query string copied!'));
+}
+function copyAppURL(){
+  readDOM();
+  try{
+    const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+    const u=`${location.origin}${location.pathname}?_s=${encoded}`;
+    navigator.clipboard.writeText(u).then(()=>notify('🔗 Shareable app URL copied!'));
+  }catch(e){notify('❌ Could not generate share URL');}
+}
+function openGoogle(){
+  const url=buildGoogleURL();
+  if(!url){notify('⚠️ Build a query first');return;}
+  const a=document.createElement('a');
+  a.href=url;a.target='_blank';a.rel='noopener noreferrer';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+// Preset helpers
+function _kwSet(v){if(S.kw[0].v===''){S.kw[0].v=v;}else{S.kw.push({v,op:'AND'});}renderKw();}
+function _ftSet(v){S.ft=v;document.getElementById('ft-sel').value=v;}
+function _siteAdd(v,ex){if(S.sites[0].v===''){S.sites[0]={v,ex};}else{S.sites.push({v,ex});}renderSites();}
+function _inurlAdd(v,ex){if(S.inurls[0].v===''){S.inurls[0]={v,ex};}else{S.inurls.push({v,ex});}renderInurls();}
+function _intitleAdd(v,ex){if(S.intitles[0].v===''){S.intitles[0]={v,ex};}else{S.intitles.push({v,ex});}renderIntitles();}
+function _rangeAdd(f,t){S.ranges=[{from:f,to:t}];renderRanges();}
+function _dtQuick(c){
+  S.dateMode='quick';S.quickDate=c;
+  document.querySelectorAll('.dtab').forEach((t,i)=>t.classList.toggle('active',i===1));
+  document.querySelectorAll('.dtab-body').forEach((b,i)=>b.classList.toggle('show',i===1));
+  document.querySelectorAll('#quick-chips .chip').forEach(ch=>ch.classList.toggle('sel',ch.dataset.code===c));
+}
+function _typeSet(c){
+  S.searchType=c;
+  document.querySelectorAll('#type-chips .chip').forEach(ch=>ch.classList.toggle('sel',ch.dataset.code===c));
+}
+
+function resetAll(silent=false){
+  S.kw=[{v:'',op:'AND'}];S.ph=[''];S.sites=[{v:'',ex:false}];
+  S.inurls=[{v:'',ex:false}];S.intitles=[{v:'',ex:false}];S.intexts=[{v:'',ex:false}];
+  S.arounds=[{w1:'',w2:'',n:5}];S.ranges=[{from:'',to:''}];
+  S.ft='';S.ftc='';S.related='';S.cache='';S.define='';
+  S.dateMode='none';S.quickDate='';S.custAmt='';S.custUnit='h';
+  S.dateFrom='';S.dateTo='';S.searchType='';S.numRes='';S.safe='';S.lang='';S.country='';
+  renderKw();renderPh();renderSites();renderInurls();renderIntitles();renderIntexts();renderArounds();renderRanges();
+  ['ft-sel','num-res','safe','lang-sel','country-sel'].forEach(id=>document.getElementById(id).value='');
+  ['ft-cust','related','cache','define','cust-amt','date-from','date-to'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cust-unit').value='h';
+  document.querySelectorAll('.dtab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.querySelectorAll('.dtab-body').forEach((b,i)=>b.classList.toggle('show',i===0));
+  document.querySelectorAll('#quick-chips .chip').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('#type-chips .chip').forEach(c=>c.classList.toggle('sel',c.dataset.code===''));
+  if(!silent) notify('🗑️ All fields have been reset');
+  update();
+}
+
+function loadFromURL(){
+  try{
+    const p=new URLSearchParams(location.search);
+    if(p.has('_s')){
+      const saved=JSON.parse(decodeURIComponent(escape(atob(p.get('_s')))));
+      Object.assign(S,saved);
+      renderKw();renderPh();renderSites();renderInurls();renderIntitles();renderIntexts();renderArounds();renderRanges();
+      if(S.ft) document.getElementById('ft-sel').value=S.ft;
+      if(S.ftc) document.getElementById('ft-cust').value=S.ftc;
+      if(S.related) document.getElementById('related').value=S.related;
+      if(S.cache) document.getElementById('cache').value=S.cache;
+      if(S.define) document.getElementById('define').value=S.define;
+      if(S.numRes) document.getElementById('num-res').value=S.numRes;
+      if(S.safe) document.getElementById('safe').value=S.safe;
+      if(S.lang) document.getElementById('lang-sel').value=S.lang;
+      if(S.country) document.getElementById('country-sel').value=S.country;
+      if(S.custAmt) document.getElementById('cust-amt').value=S.custAmt;
+      if(S.custUnit) document.getElementById('cust-unit').value=S.custUnit;
+      if(S.dateFrom) document.getElementById('date-from').value=S.dateFrom;
+      if(S.dateTo) document.getElementById('date-to').value=S.dateTo;
+      if(S.dateMode!=='none'){
+        const mi=['none','quick','custom','range'].indexOf(S.dateMode);
+        if(mi>0){document.querySelectorAll('.dtab')[mi].classList.add('active');document.querySelectorAll('.dtab-body')[mi].classList.add('show');document.querySelectorAll('.dtab')[0].classList.remove('active');document.querySelectorAll('.dtab-body')[0].classList.remove('show');}
+      }
+      if(S.quickDate){document.querySelectorAll('#quick-chips .chip').forEach(c=>c.classList.toggle('sel',c.dataset.code===S.quickDate));}
+      if(S.searchType){document.querySelectorAll('#type-chips .chip').forEach(c=>c.classList.toggle('sel',c.dataset.code===S.searchType));}
+      notify('✅ Shared query loaded successfully!');
+    }
+  }catch(e){console.warn('Failed to load shared state:',e);}
+}
+
+function init(){
+  // File types
+  const ftSel=document.getElementById('ft-sel');
+  FILETYPES.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f.toUpperCase();ftSel.appendChild(o);});
+  // Languages
+  const lSel=document.getElementById('lang-sel');
+  [...LANGUAGES].sort((a,b)=>a.n.localeCompare(b.n)).forEach(l=>{const o=document.createElement('option');o.value=l.c;o.textContent=l.n;lSel.appendChild(o);});
+  // Countries
+  const cSel=document.getElementById('country-sel');
+  [...COUNTRIES].sort((a,b)=>a.n.replace(/[^\w]/g,'').localeCompare(b.n.replace(/[^\w]/g,''))).forEach(c=>{const o=document.createElement('option');o.value=c.c;o.textContent=c.n;cSel.appendChild(o);});
+  // Quick date chips
+  const qc=document.getElementById('quick-chips');
+  QUICK_DATE.forEach(d=>{const b=document.createElement('button');b.className='chip';b.textContent=d.n;b.dataset.code=d.c;b.onclick=()=>{if(S.quickDate===d.c){S.quickDate='';b.classList.remove('sel');}else{S.quickDate=d.c;qc.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');}update();};qc.appendChild(b);});
+  // Search type chips
+  const tc=document.getElementById('type-chips');
+  SEARCH_TYPES.forEach(t=>{const b=document.createElement('button');b.className='chip'+(t.c===''?' sel':'');b.textContent=t.n;b.dataset.code=t.c;b.onclick=()=>{S.searchType=t.c;tc.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');update();};tc.appendChild(b);});
+  // Presets
+  const pg=document.getElementById('preset-grid');
+  PRESETS_DATA.forEach(p=>{const b=document.createElement('button');b.className='pr';b.innerHTML=`<span class="pr-n">${p.n}</span><span class="pr-d">${p.d}</span>`;b.onclick=p.fn;pg.appendChild(b);});
+  // Initial renders
+  renderKw();renderPh();renderSites();renderInurls();renderIntitles();renderIntexts();renderArounds();renderRanges();
+  loadFromURL();
+  update();
+}
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
